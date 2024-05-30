@@ -1,0 +1,7 @@
+opencv-python
+deepface
+numpy
+pandas
+tensorflow
+keras
+tk
