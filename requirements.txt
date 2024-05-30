@@ -5,3 +5,4 @@ pandas
 tensorflow
 keras
 tk
+tf-keras

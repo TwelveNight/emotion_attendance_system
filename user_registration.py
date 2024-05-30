@@ -1,6 +1,6 @@
 import cv2
-from deepface import DeepFace
 import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 def capture_face():
     # 这里省略OpenCV捕捉人脸图像的代码
