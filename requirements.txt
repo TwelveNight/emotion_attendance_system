@@ -1,8 +1,13 @@
 opencv-python
+tensorflow<2.11
 deepface
 numpy
 pandas
-tensorflow
 keras
 tk
-tf-keras
+matplotlib
+pillow
+tqdm
+flask
+scikit-learn
+mediapipe
