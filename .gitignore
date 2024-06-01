@@ -169,8 +169,9 @@ cython_debug/
 #.idea/
 
 # train and test data
-data/train
-data/test
+train/train_tensorflow/data/train
+train/train_tensorflow/data/test
+train/train_sklearn/data
 
 haarcascade_frontalface_default.xml
 fer2013.csv
