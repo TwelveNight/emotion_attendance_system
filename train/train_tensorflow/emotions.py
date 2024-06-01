@@ -10,7 +10,13 @@ import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-model_dir = '..\\models'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define data generators
+train_dir = os.path.join(base_dir, 'data/train')
+val_dir = os.path.join(base_dir, 'data/test')
+
+model_dir = os.path.join(base_dir, '../../models')
 model_path = os.path.join(model_dir, 'model.h5')
 
 # command line argument
@@ -46,14 +52,12 @@ def plot_model_history(model_history, step=5):
     plt.show()
 
 
-# Define data generators
-train_dir = '..\\data\\train'
-val_dir = '..\\data\\test'
+
 
 num_train = 28709
 num_val = 7178
 batch_size = 64
-num_epoch = 50
+num_epoch = 5
 
 train_datagen = ImageDataGenerator(rescale=1. / 255)
 val_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -128,7 +132,7 @@ elif mode == "display":
         ret, frame = cap.read()
         if not ret:
             break
-        facecasc = cv2.CascadeClassifier(cv2.data.haarcascades+'haarcascade_frontalface_default.xml')
+        facecasc = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = facecasc.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
 

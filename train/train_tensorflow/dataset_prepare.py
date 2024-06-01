@@ -16,14 +16,14 @@ def atoi(s):
 # making folders
 outer_names = ['test', 'train']
 inner_names = ['angry', 'disgusted', 'fearful', 'happy', 'sad', 'surprised', 'neutral']
-os.makedirs('../data', exist_ok=True)
+os.makedirs('data', exist_ok=True)
 for outer_name in outer_names:
-    os.makedirs(os.path.join('../data', outer_name), exist_ok=True)
+    os.makedirs(os.path.join('data', outer_name), exist_ok=True)
     for inner_name in inner_names:
-        os.makedirs(os.path.join('../data', outer_name, inner_name), exist_ok=True)
+        os.makedirs(os.path.join('data', outer_name, inner_name), exist_ok=True)
 
-train_dir = '../data/train'
-val_dir = '../data/test'
+train_dir = './data/train'
+val_dir = './data/test'
 # to keep count of each category
 angry = 0
 disgusted = 0
@@ -40,7 +40,7 @@ sad_test = 0
 surprised_test = 0
 neutral_test = 0
 
-df = pd.read_csv('./fer2013.csv')
+df = pd.read_csv('fer2013.csv')
 mat = np.zeros((48, 48), dtype=np.uint8)
 print("Saving images...")
 
