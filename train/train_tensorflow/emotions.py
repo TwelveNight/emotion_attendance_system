@@ -54,10 +54,10 @@ def plot_model_history(model_history, step=5):
 
 
 
-num_train = 28709
-num_val = 7178
+num_train = 15216
+num_val = 3852
 batch_size = 64
-num_epoch = 5
+num_epoch = 50
 
 train_datagen = ImageDataGenerator(rescale=1. / 255)
 val_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -93,7 +93,7 @@ model.add(Dropout(0.25))
 model.add(Flatten())
 model.add(Dense(1024, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(7, activation='softmax'))
+model.add(Dense(3, activation='softmax'))
 
 # If you want to train the same model or try other models, go for this
 if mode == "train":
@@ -123,7 +123,8 @@ elif mode == "display":
     cv2.ocl.setUseOpenCL(False)
 
     # dictionary which assigns each label an emotion (alphabetical order)
-    emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
+    # emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
+    emotion_dict = {0: "Happy", 1: "Sad", 2: "Surprised"}
 
     # start the webcam feed
     cap = cv2.VideoCapture(0)
@@ -146,8 +147,7 @@ elif mode == "display":
                         2, cv2.LINE_AA)
 
         cv2.imshow('Video', cv2.resize(frame, (1600, 960), interpolation=cv2.INTER_CUBIC))
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        cv2.waitKey(25)
 
     cap.release()
     cv2.destroyAllWindows()
