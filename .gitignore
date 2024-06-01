@@ -172,3 +172,4 @@ cython_debug/
 data/train
 data/test
 
+haarcascade_frontalface_default.xml
