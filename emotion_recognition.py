@@ -1,8 +1,9 @@
 import pickle
 import cv2
 import numpy as np
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Sequential
 from train.train_sklearn.utils import get_face_landmarks  # 假设这个函数已经定义在utils模块中
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 
 # 定义情绪标签
 emotions = ['Happy', 'Sad', 'Surprised']
@@ -13,7 +14,24 @@ def load_models():
     with open('models/model.pkl', 'rb') as f:
         model_pkl = pickle.load(f)
 
-    model_h5 = load_model('models/model.h5')
+    model_h5 = Sequential()
+    model_h5.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(48, 48, 1)))
+    model_h5.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+    model_h5.add(MaxPooling2D(pool_size=(2, 2)))
+    model_h5.add(Dropout(0.25))
+
+    model_h5.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+    model_h5.add(MaxPooling2D(pool_size=(2, 2)))
+    model_h5.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+    model_h5.add(MaxPooling2D(pool_size=(2, 2)))
+    model_h5.add(Dropout(0.25))
+
+    model_h5.add(Flatten())
+    model_h5.add(Dense(1024, activation='relu'))
+    model_h5.add(Dropout(0.5))
+    model_h5.add(Dense(3, activation='softmax'))
+
+    model_h5.load_weights('models/model.h5')
 
     return model_pkl, model_h5
 
