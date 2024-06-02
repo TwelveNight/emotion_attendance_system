@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 
 # define models dir path
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, '../../models/model')
+model_path = os.path.join(base_dir, '../../models/model.pkl')
 
 # Load data from the text file
 data_file = "data.txt"

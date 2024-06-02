@@ -6,7 +6,7 @@ from utils import get_face_landmarks
 
 emotions = ['HAPPY', 'SAD', 'SURPRISED']
 
-with open('../../models/model', 'rb') as f:
+with open('../../models/model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 cap = cv2.VideoCapture(0)
