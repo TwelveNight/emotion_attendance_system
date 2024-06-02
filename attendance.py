@@ -1,26 +1,46 @@
 import pandas as pd
-import cv2
+import os
+from deepface import DeepFace
 from emotion_recognition import recognize_emotion
+from user_registration import capture_face
 
 
-def check_in(user_id, model_type='pkl'):
-    face_image = cv2.imread(f"data/users/{user_id}/face.jpg")
-    emotion = recognize_emotion(face_image, model_type)
-    if emotion == "Happy":
-        save_attendance(user_id, "check-in")
-        print("Check-in successful.")
-    else:
-        print("Check-in failed. Please be happy!")
+def find_user(face_image):
+    # 假设我们的人脸数据保存在 "data/users/" 目录下，每个用户一个文件夹，文件夹名为用户ID
+    user_id = None
+    for user_folder in os.listdir("data/users/"):
+        user_face_path = f"data/users/{user_folder}/face.jpg"
+        result = DeepFace.find(img_path=face_image, db_path=user_face_path, enforce_detection=False)
+        if len(result) > 0:
+            user_id = user_folder
+            break
+    return user_id
 
 
-def check_out(user_id, model_type='pkl'):
-    face_image = cv2.imread(f"data/users/{user_id}/face.jpg")
-    emotion = recognize_emotion(face_image, model_type)
-    if emotion == "Happy":
-        save_attendance(user_id, "check-out")
-        print("Check-out successful.")
-    else:
-        print("Check-out failed. Please be happy!")
+def check_in(model_type='pkl'):
+    face_image = capture_face()
+    user_id = find_user(face_image)
+    if user_id:
+        emotion = recognize_emotion(face_image, model_type)
+        if emotion == "Happy":
+            save_attendance(user_id, "check-in")
+            return "Check-in successful."
+        else:
+            return "Check-in failed. Please be happy!"
+    return "User not recognized."
+
+
+def check_out(model_type='pkl'):
+    face_image = capture_face()
+    user_id = find_user(face_image)
+    if user_id:
+        emotion = recognize_emotion(face_image, model_type)
+        if emotion == "Happy":
+            save_attendance(user_id, "check-out")
+            return "Check-out successful."
+        else:
+            return "Check-out failed. Please be happy!"
+    return "User not recognized."
 
 
 def save_attendance(user_id, status):
@@ -31,4 +51,4 @@ def save_attendance(user_id, status):
 
 def view_attendance():
     df = pd.read_csv("data/attendance.csv")
-    return df.to_html()
+    return df

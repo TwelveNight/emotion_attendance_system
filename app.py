@@ -41,18 +41,16 @@ def register():
 
 @app.route('/check_in', methods=['POST'])
 def check_in_route():
-    user_id = request.form['user_id']
     model_type = request.form['model_type']
-    check_in(user_id, model_type)
-    return redirect(url_for('index'))
+    message = check_in(model_type)
+    return render_template('message.html', message=message)
 
 
 @app.route('/check_out', methods=['POST'])
 def check_out_route():
-    user_id = request.form['user_id']
     model_type = request.form['model_type']
-    check_out(user_id, model_type)
-    return redirect(url_for('index'))
+    message = check_out(model_type)
+    return render_template('message.html', message=message)
 
 
 @app.route('/view_attendance')
