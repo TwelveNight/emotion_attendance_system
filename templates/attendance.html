@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Attendance Data</title>
+</head>
+<body>
+<h1>Attendance Data</h1>
+<table border="1">
+  <thead>
+  <tr>
+    <th>User ID</th>
+    <th>Time</th>
+    <th>Status</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for row in data.itertuples() %}
+  <tr>
+    <td>{{ row.user_id }}</td>
+    <td>{{ row.time }}</td>
+    <td>{{ row.status }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<a href="/">Back to Home</a>
+</body>
+</html>
