@@ -244,3 +244,6 @@ fer2013.csv
 # Models
 *.pkl
 *.h5
+
+# Misc
+*.txt
