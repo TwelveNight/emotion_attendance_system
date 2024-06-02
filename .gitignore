@@ -241,3 +241,6 @@ fer2013.csv
 *.3dm
 *.max
 
+# Models
+*.pkl
+*.h5
