@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emotion-based Attendance System</title>
+</head>
+<body>
+<h1>Emotion-based Attendance System</h1>
+<div>
+    <img src="{{ url_for('video_feed') }}" width="640" height="480">
+</div>
+<form action="/check_in" method="post">
+    <label for="user_id_check_in">User ID:</label>
+    <input type="text" id="user_id_check_in" name="user_id" required>
+    <label for="model_type_check_in">Model Type:</label>
+    <select id="model_type_check_in" name="model_type">
+        <option value="pkl">pkl</option>
+        <option value="h5">h5</option>
+    </select>
+    <button type="submit">Check In</button>
+</form>
+<form action="/check_out" method="post">
+    <label for="user_id_check_out">User ID:</label>
+    <input type="text" id="user_id_check_out" name="user_id" required>
+    <label for="model_type_check_out">Model Type:</label>
+    <select id="model_type_check_out" name="model_type">
+        <option value="pkl">pkl</option>
+        <option value="h5">h5</option>
+    </select>
+    <button type="submit">Check Out</button>
+</form>
+<a href="/register">Register User</a>
+<a href="/view_attendance">View Attendance Data</a>
+</body>
+</html>
