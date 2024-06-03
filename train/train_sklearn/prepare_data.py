@@ -6,7 +6,7 @@ import numpy as np
 from utils import get_face_landmarks
 
 
-data_dir = './data'
+data_dir = 'data'
 
 output = []
 for emotion_indx, emotion in enumerate(sorted(os.listdir(data_dir))):

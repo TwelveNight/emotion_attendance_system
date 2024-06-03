@@ -23,7 +23,7 @@ for outer_name in outer_names:
         os.makedirs(os.path.join('data', outer_name, inner_name), exist_ok=True)
 
 train_dir = './data/train'
-val_dir = './data/test'
+val_dir = 'data/test'
 # to keep count of each category
 angry = 0
 disgusted = 0

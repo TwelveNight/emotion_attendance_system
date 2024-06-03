@@ -3,7 +3,6 @@ import mediapipe as mp
 
 
 def get_face_landmarks(image, draw=False, static_image_mode=True):
-
     # Read the input image
     image_input_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -16,12 +15,9 @@ def get_face_landmarks(image, draw=False, static_image_mode=True):
     image_landmarks = []
 
     if results.multi_face_landmarks:
-
         if draw:
-
             mp_drawing = mp.solutions.drawing_utils
             drawing_spec = mp_drawing.DrawingSpec(thickness=2, circle_radius=1)
-
             mp_drawing.draw_landmarks(
                 image=image,
                 landmark_list=results.multi_face_landmarks[0],
@@ -41,5 +37,4 @@ def get_face_landmarks(image, draw=False, static_image_mode=True):
             image_landmarks.append(xs_[j] - min(xs_))
             image_landmarks.append(ys_[j] - min(ys_))
             image_landmarks.append(zs_[j] - min(zs_))
-
     return image_landmarks
