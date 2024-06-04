@@ -17,25 +17,25 @@ with open('../../models/model.pkl', 'rb') as f:
 
 cap = cv2.VideoCapture(0)
 
-ret, frame = cap.read()
+ret, global_frame = cap.read()
 
 while ret:
-    ret, frame = cap.read()
+    ret, global_frame = cap.read()
 
-    face_landmarks = get_face_landmarks(frame, draw=True, static_image_mode=False)
+    face_landmarks = get_face_landmarks(global_frame, draw=True, static_image_mode=False)
 
     if face_landmarks:
         output = model.predict([face_landmarks])
         print(emotions[int(output[0])])
-        cv2.putText(frame,
+        cv2.putText(global_frame,
                     emotions[int(output[0])],
-                    (10, frame.shape[0] - 1),
+                    (10, global_frame.shape[0] - 1),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     3,
                     (0, 255, 0),
                     5)
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', global_frame)
 
     cv2.waitKey(25)
 
