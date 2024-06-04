@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 camera = cv2.VideoCapture(0)
 detected_face = None
-frame = None
+global_frame = None
 
 emotions = ['happy', 'sad', 'surprised']
 
@@ -27,7 +27,7 @@ with open('models/model.pkl', 'rb') as f:
 
 def gen_frames():
     global detected_face
-    global frame
+    global global_frame
     # face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
 
     while True:
@@ -42,10 +42,11 @@ def gen_frames():
             #     cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             #     detected_face = frame[y:y + h, x:x + w]
 
+            global_frame = frame
             face_landmarks = get_face_landmarks(frame, draw=True, static_image_mode=False)
             if face_landmarks:
                 output = model.predict([face_landmarks])
-                cv2.putText(frame,
+                cv2.putText(global_frame,
                             emotions[int(output[0])],
                             (10, frame.shape[0] - 1),
                             cv2.FONT_HERSHEY_SIMPLEX,
@@ -54,9 +55,9 @@ def gen_frames():
                             5)
 
             ret, buffer = cv2.imencode('.jpg', frame)
-            frame_byt = buffer.tobytes()
+            frame = buffer.tobytes()
             yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_byt + b'\r\n')
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 @app.route('/')
@@ -72,10 +73,10 @@ def video_feed():
 @app.route('/register', methods=['POST'])
 def register():
     global detected_face
-    global frame
+    global global_frame
     user_id = request.form['user_id']
-    if frame is not None:
-        success = register_user(user_id, frame)
+    if global_frame is not None:
+        success = register_user(user_id, global_frame)
         if success:
             flash("User registered successfully.")
         else:
@@ -88,13 +89,13 @@ def register():
 @app.route('/check_in', methods=['POST'])
 def check_in_route():
     global detected_face
-    global frame
-    if frame is not None:
+    global global_frame
+    if global_frame is not None:
         model_type = request.form['model_type']
-        user_id = find_user(frame)
+        user_id = find_user(global_frame)
         if user_id is not None:
             # cv2.imwrite(f"data/check-in.jpg", detected_face)
-            emotion = recognize_emotion(frame, model_type)
+            emotion = recognize_emotion(global_frame, model_type)
             print(emotion)
             if emotion == "happy":
                 save_attendance(user_id, "check-in")
@@ -111,12 +112,12 @@ def check_in_route():
 @app.route('/check_out', methods=['POST'])
 def check_out_route():
     global detected_face
-    global frame
-    if frame is not None:
+    global global_frame
+    if global_frame is not None:
         model_type = request.form['model_type']
-        user_id = find_user(frame)
+        user_id = find_user(global_frame)
         if user_id is not None:
-            emotion = recognize_emotion(frame, model_type)
+            emotion = recognize_emotion(global_frame, model_type)
             if emotion == "happy":
                 save_attendance(user_id, "check-out")
                 message = "Check-out successful."
