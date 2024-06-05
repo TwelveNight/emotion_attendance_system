@@ -9,15 +9,15 @@ def find_user(face_image):
     for user_folder in os.listdir("data/users/"):
         user_face_path = f"data/users/{user_folder}"
         result = DeepFace.find(img_path=face_image, db_path=user_face_path, enforce_detection=False)
-        if len(result) > 0:
+        if len(result[0]['identity']) > 0:
             user_id = user_folder
             break
     return user_id
 
 
-def save_attendance(user_id, status):
-    df = pd.DataFrame(columns=["user_id", "time", "status"])
-    df.loc[len(df)] = [user_id, pd.Timestamp.now(), status]
+def save_attendance(user_id, status,emotion):
+    df = pd.DataFrame(columns=["user_id", "time", "status","emotion"])
+    df.loc[len(df)] = [user_id, pd.Timestamp.now(), status,emotion]
     df.to_csv("data/attendance.csv", mode='a', header=False, index=False)
 
 

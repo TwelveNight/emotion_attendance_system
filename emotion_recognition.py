@@ -2,9 +2,31 @@ import pickle
 import cv2
 import numpy as np
 from tensorflow.keras.models import Sequential
-from train.train_sklearn.utils import get_face_landmarks  # 假设这个函数已经定义在utils模块中
+from train.train_sklearn_emotion.utils import get_face_landmarks
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from deepface import DeepFace
+from ultralytics import YOLO
+import os
+
+
+def capture_face_from_frame(frame):
+    H, w, _ = frame.shape
+    print(f"Frame shape: {frame.shape}")
+    model_path = os.path.join('models', 'yolov8n-face.pt')
+
+    model = YOLO(model_path)
+
+    threshold = 0.5
+
+    results = model(frame)[0]
+    print(results)
+    for result in results.boxes.data.tolist():
+        x1, y1, x2, y2, score, class_id = result
+        if score > threshold:
+            return frame[int(y1) - 100:int(y2) + 50, int(x1) - 50:int(x2) + 50]
+    print("No face detected.")
+    return None
+
 
 # 定义情绪标签
 emotions = ['happy', 'sad', 'surprised']
@@ -39,6 +61,8 @@ def load_models():
 
 # 使用 model.pkl 进行情绪识别
 def recognize_emotion_pkl(frame):
+    # 初始化模型
+    model_pkl, model_h5 = load_models()
     face_landmarks = get_face_landmarks(frame, draw=False, static_image_mode=True)
     if face_landmarks:
         prediction = model_pkl.predict([face_landmarks])
@@ -49,29 +73,22 @@ def recognize_emotion_pkl(frame):
 
 # 使用 model.h5 进行情绪识别
 def recognize_emotion_h5(frame):
-    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
-    emotion_dict = {0: "happy", 1: "sad", 2: "surprised"}
+    # 初始化模型
+    model_pkl, model_h5 = load_models()
+    face = capture_face_from_frame(frame)
+    gray = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
 
-    for (x, y, w, h) in faces:
-        roi_gray = gray[y:y + h, x:x + w]
-        cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
-        prediction = model_h5.predict(cropped_img)
-        maxindex = int(np.argmax(prediction))
-        print(emotion_dict[maxindex])
-        return emotion_dict[maxindex]
-    return None
+    cropped_img = np.expand_dims(np.expand_dims(cv2.resize(gray, (48, 48)), -1), 0)
+    prediction = model_h5.predict(cropped_img)
+    maxindex = int(np.argmax(prediction))
+    print(emotions[maxindex])
+    return emotions[maxindex]
 
 
 def recognize_emotion_deepface(frame):
     result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
     print(result[0]['dominant_emotion'])
     return result[0]['dominant_emotion']
-
-
-# 初始化模型
-model_pkl, model_h5 = load_models()
 
 
 def recognize_emotion(face_image, model_type='pkl'):

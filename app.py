@@ -1,6 +1,6 @@
 from flask import Flask, render_template, Response, request, redirect, url_for, flash
 from attendance import view_attendance, save_attendance, find_user
-from train.train_sklearn.utils import get_face_landmarks
+from train.train_sklearn_emotion.utils import get_face_landmarks
 from user_registration import register_user
 from emotion_recognition import recognize_emotion
 import pickle
@@ -14,6 +14,7 @@ os.environ["TF_CPP_VMODULE"] = "gpu_process_state=10,gpu_cudamallocasync_allocat
 a = tf.zeros([], tf.float32)
 
 app = Flask(__name__)
+app.secret_key = 'secret_key'
 
 camera = cv2.VideoCapture(0)
 detected_face = None
@@ -32,18 +33,11 @@ def gen_frames():
 
     while True:
         success, frame = camera.read()
+        global_frame = frame
         if not success:
             break
         else:
-            # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
-            # 
-            # for (x, y, w, h) in faces:
-            #     cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            #     detected_face = frame[y:y + h, x:x + w]
-
-            global_frame = frame
-            face_landmarks = get_face_landmarks(frame, draw=True, static_image_mode=False)
+            face_landmarks = get_face_landmarks(frame, draw=False, static_image_mode=False)
             if face_landmarks:
                 output = model.predict([face_landmarks])
                 cv2.putText(global_frame,
@@ -93,15 +87,12 @@ def check_in_route():
     if global_frame is not None:
         model_type = request.form['model_type']
         user_id = find_user(global_frame)
+        print(user_id)
         if user_id is not None:
-            # cv2.imwrite(f"data/check-in.jpg", detected_face)
             emotion = recognize_emotion(global_frame, model_type)
             print(emotion)
-            if emotion == "happy":
-                save_attendance(user_id, "check-in")
-                message = "Check-in successful."
-            else:
-                message = "Check-in failed. Please be happy!"
+            save_attendance(user_id, "check-in", emotion)
+            message = "Check-in successful."
         else:
             message = "User not recognized."
     else:
@@ -118,11 +109,8 @@ def check_out_route():
         user_id = find_user(global_frame)
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
-            if emotion == "happy":
-                save_attendance(user_id, "check-out")
-                message = "Check-out successful."
-            else:
-                message = "Check-out failed. Please be happy!"
+            save_attendance(user_id, "check-out", emotion)
+            message = "Check-out successful."
         else:
             message = "User not recognized."
     else:
