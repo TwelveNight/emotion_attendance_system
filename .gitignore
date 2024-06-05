@@ -172,6 +172,7 @@ cython_debug/
 train/train_tensorflow/data/train
 train/train_tensorflow/data/test
 train/train_sklearn/data
+train/train_yolo_face_detection/runs
 
 haarcascade_frontalface_default.xml
 fer2013.csv
@@ -244,6 +245,8 @@ fer2013.csv
 # Models
 *.pkl
 *.h5
+*.pt
+*.npz
 
 # Misc
 *.txt
