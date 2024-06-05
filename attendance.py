@@ -15,12 +15,18 @@ def find_user(face_image):
     return user_id
 
 
-def save_attendance(user_id, status,emotion):
-    df = pd.DataFrame(columns=["user_id", "time", "status","emotion"])
-    df.loc[len(df)] = [user_id, pd.Timestamp.now(), status,emotion]
+def save_attendance(user_id, status, emotion):
+    df = pd.DataFrame(columns=["user_id", "time", "status", "emotion"])
+    df.loc[len(df)] = [user_id, pd.Timestamp.now(), status, emotion]
+    print("Saving data: ", df)
     df.to_csv("data/attendance.csv", mode='a', header=False, index=False)
 
 
 def view_attendance():
-    df = pd.read_csv("data/attendance.csv")
-    return df
+    if os.path.exists("data/attendance.csv"):
+        df = pd.read_csv("data/attendance.csv", names=["user_id", "time", "status", "emotion"])
+        print("Loaded data: ", df)
+        return df
+    else:
+        print("attendance.csv not found")
+        return pd.DataFrame(columns=["user_id", "time", "status", "emotion"])
