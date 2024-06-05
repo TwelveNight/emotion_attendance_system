@@ -1,36 +1,16 @@
 import pickle
 import cv2
 import numpy as np
+import torch
 from tensorflow.keras.models import Sequential
+
+from face_detection import capture_face_from_frame
 from train.train_sklearn_emotion.utils import get_face_landmarks
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 from deepface import DeepFace
-from ultralytics import YOLO
-import os
-
-
-def capture_face_from_frame(frame):
-    H, w, _ = frame.shape
-    print(f"Frame shape: {frame.shape}")
-    model_path = os.path.join('models', 'yolov8n-face.pt')
-
-    model = YOLO(model_path)
-
-    threshold = 0.5
-
-    results = model(frame)[0]
-    print(results)
-    for result in results.boxes.data.tolist():
-        x1, y1, x2, y2, score, class_id = result
-        if score > threshold:
-            return frame[int(y1) - 100:int(y2) + 50, int(x1) - 50:int(x2) + 50]
-    print("No face detected.")
-    return None
-
 
 # 定义情绪标签
 emotions = ['happy', 'sad', 'surprised']
-
 
 # 加载模型
 def load_models():
@@ -63,7 +43,8 @@ def load_models():
 def recognize_emotion_pkl(frame):
     # 初始化模型
     model_pkl, model_h5 = load_models()
-    face_landmarks = get_face_landmarks(frame, draw=False, static_image_mode=True)
+    face = capture_face_from_frame(frame)
+    face_landmarks = get_face_landmarks(face, draw=False, static_image_mode=True)
     if face_landmarks:
         prediction = model_pkl.predict([face_landmarks])
         print(emotions[int(prediction[0])])
@@ -81,6 +62,7 @@ def recognize_emotion_h5(frame):
     cropped_img = np.expand_dims(np.expand_dims(cv2.resize(gray, (48, 48)), -1), 0)
     prediction = model_h5.predict(cropped_img)
     maxindex = int(np.argmax(prediction))
+    torch.cuda.empty_cache()
     print(emotions[maxindex])
     return emotions[maxindex]
 

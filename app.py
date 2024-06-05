@@ -1,12 +1,15 @@
-from flask import Flask, render_template, Response, request, redirect, url_for, flash
-from attendance import view_attendance, save_attendance, find_user
-from train.train_sklearn_emotion.utils import get_face_landmarks
-from user_registration import register_user
-from emotion_recognition import recognize_emotion
-import pickle
-import cv2
+from flask import Flask, render_template, Response, request, redirect, url_for, flash, jsonify
 import os
+import signal
+import cv2
 import tensorflow as tf
+import torch
+
+import face_matching
+from attendance import view_attendance, save_attendance
+from emotion_recognition import recognize_emotion
+from user_register import register_face
+from utils import save_frame
 
 os.environ["TF_GPU_ALLOCATOR"] = "cuda_malloc_async"
 os.environ["TF_CPP_VMODULE"] = "gpu_process_state=10,gpu_cudamallocasync_allocator=10"
@@ -20,38 +23,24 @@ camera = cv2.VideoCapture(0)
 detected_face = None
 global_frame = None
 
-emotions = ['happy', 'sad', 'surprised']
-
-with open('models/model.pkl', 'rb') as f:
-    model = pickle.load(f)
+skip_landmarks = False
 
 
 def gen_frames():
     global detected_face
     global global_frame
-    # face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_alt2.xml')
+    global skip_landmarks
 
     while True:
         success, frame = camera.read()
         global_frame = frame
         if not success:
             break
-        else:
-            face_landmarks = get_face_landmarks(frame, draw=False, static_image_mode=False)
-            if face_landmarks:
-                output = model.predict([face_landmarks])
-                cv2.putText(global_frame,
-                            emotions[int(output[0])],
-                            (10, frame.shape[0] - 1),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            3,
-                            (0, 255, 0),
-                            5)
 
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 @app.route('/')
@@ -66,17 +55,32 @@ def video_feed():
 
 @app.route('/register', methods=['POST'])
 def register():
-    global detected_face
-    global global_frame
+    global global_frame, skip_landmarks
     user_id = request.form['user_id']
-    if global_frame is not None:
-        success = register_user(user_id, global_frame)
-        if success:
-            flash("User registered successfully.")
+    face_count = 1
+
+    if global_frame is None:
+        flash("No frame available for capturing faces.")
+        return redirect(url_for('index'))
+
+    skip_landmarks = True
+
+    while face_count <= 10:
+        if global_frame is not None:
+            face_count = save_frame(global_frame, user_id, image_counter=face_count)
         else:
-            flash("User registration failed. No face detected.")
+            flash("No face detected.")
+            break
+
+    if face_count > 10:
+        flash("User registered successfully.")
     else:
-        flash("No face detected.")
+        flash("User registration failed. No face detected in some frames.")
+    torch.cuda.empty_cache()
+    register_face()
+
+    skip_landmarks = False
+
     return redirect(url_for('index'))
 
 
@@ -84,44 +88,64 @@ def register():
 def check_in_route():
     global detected_face
     global global_frame
+    global skip_landmarks
+
+    skip_landmarks = True
+
     if global_frame is not None:
+        user_id = face_matching.recognize_faces(global_frame)
         model_type = request.form['model_type']
-        user_id = find_user(global_frame)
         print(user_id)
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
-            print(emotion)
             save_attendance(user_id, "check-in", emotion)
-            message = "Check-in successful."
+            message = "Success:" + emotion
         else:
             message = "User not recognized."
     else:
         message = "No face detected."
-    return render_template('message.html', message=message)
+
+    skip_landmarks = False
+
+    return message
 
 
 @app.route('/check_out', methods=['POST'])
 def check_out_route():
     global detected_face
     global global_frame
+    global skip_landmarks
+
+    skip_landmarks = True
+
     if global_frame is not None:
+        user_id = face_matching.recognize_faces(global_frame)
         model_type = request.form['model_type']
-        user_id = find_user(global_frame)
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
             save_attendance(user_id, "check-out", emotion)
-            message = "Check-out successful."
+            message = "Success:" + emotion
         else:
             message = "User not recognized."
     else:
         message = "No face detected."
-    return render_template('message.html', message=message)
+
+    skip_landmarks = False
+
+    return message
 
 
 @app.route('/view_attendance')
 def view_attendance_route():
-    attendance_data = view_attendance()
+    attendance_data = view_attendance().iloc[::-1]
     return render_template('attendance.html', data=attendance_data)
+
+
+@app.route('/terminate', methods=['POST'])
+def terminate():
+    pid = os.getpid()
+    os.kill(pid, signal.SIGTERM)
+    return 'Application terminated'
 
 
 if __name__ == '__main__':
