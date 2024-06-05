@@ -3,35 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <title>Emotion-based Attendance System</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            border-radius: 10px;
+        }
+        form {
+            margin: 20px 0;
+        }
+    </style>
+    <script>
+        function showAlert(message) {
+            alert(message);
+        }
+
+        function submitForm(formId) {
+            var form = document.getElementById(formId);
+            var modelType = form.querySelector('select[name="model_type"]').value;
+            var formData = new FormData(form);
+            formData.append('model_type', modelType);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open(form.method, form.action, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = xhr.responseText;
+                    if (response.startsWith("Success:")) {
+                        var emotion = response.split(':')[1];
+                        showAlert("Check-in successful. Emotion: " + emotion);
+                    } else {
+                        showAlert(response);
+                    }
+                }
+            };
+            xhr.send(formData);
+        }
+    </script>
 </head>
 <body>
-<h1>Emotion-based Attendance System</h1>
-<div>
-    <img src="{{ url_for('video_feed') }}" width="640" height="480">
+<div class="container">
+    <h1>Emotion-based Attendance System</h1>
+    <div>
+        <img src="{{ url_for('video_feed') }}" width="640" height="480">
+    </div>
+    <form id="check_in_form" action="/check_in" method="post">
+        <label for="model_type_check_in">Model Type:</label>
+        <select id="model_type_check_in" name="model_type">
+            <option value="pkl">pkl</option>
+            <option value="deepface">deepface</option>
+            <option value="h5">h5</option>
+        </select>
+        <button type="button" onclick="submitForm('check_in_form')">Check In</button>
+    </form>
+    <form id="check_out_form" action="/check_out" method="post">
+        <label for="model_type_check_out">Model Type:</label>
+        <select id="model_type_check_out" name="model_type">
+            <option value="pkl">pkl</option>
+            <option value="deepface">deepface</option>
+            <option value="h5">h5</option>
+        </select>
+        <button type="button" onclick="submitForm('check_out_form')">Check Out</button>
+    </form>
+    <form action="/register" method="post">
+        <label for="user_id_register">User ID:</label>
+        <input type="text" id="user_id_register" name="user_id" required>
+        <button type="submit">Register</button>
+    </form>
+    <a href="/view_attendance">View Attendance Data</a>
+    <form action="/terminate" method="post">
+        <button type="submit">Terminate Application</button>
+    </form>
 </div>
-<form action="/check_in" method="post">
-    <label for="model_type_check_in">Model Type:</label>
-    <select id="model_type_check_in" name="model_type">
-        <option value="pkl">pkl</option>
-        <option value="deepface">deepface</option>
-        <option value="h5">h5</option>
-    </select>
-    <button type="submit">Check In</button>
-</form>
-<form action="/check_out" method="post">
-    <label for="model_type_check_out">Model Type:</label>
-    <select id="model_type_check_out" name="model_type">
-        <option value="pkl">pkl</option>
-        <option value="deepface">deepface</option>
-        <option value="h5">h5</option>
-    </select>
-    <button type="submit">Check Out</button>
-</form>
-<form action="/register" method="post">
-    <label for="user_id_register">User ID:</label>
-    <input type="text" id="user_id_register" name="user_id" required>
-    <button type="submit">Register</button>
-</form>
-<a href="/view_attendance">View Attendance Data</a>
 </body>
 </html>
