@@ -1,0 +1,51 @@
+
+.right-box{
+  display: flex;
+  flex:1;
+  flex-direction: column;
+  row-gap: 10px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px;
+  height: 100%;
+  font-weight: 400;
+  font-size: 1rem;
+}
+.username-box,
+.emotionStatus,
+.face-status{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  column-gap: 5px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.action-status{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1rem;
+
+}
+
+
+.ok-box{
+  width: 200px;
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: #00FF00;
+  border-radius: 5px;
+  box-shadow: 0 0 5px white;
+  color:white;
+  font-size: 1rem;
+  font-weight: bold;
+
+}
