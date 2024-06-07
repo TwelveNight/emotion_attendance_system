@@ -64,7 +64,8 @@ def get_video_feed_url():
 @app.route('/register', methods=['POST'])
 def register():
     global global_frame, skip_landmarks
-    user_id = request.form['user_id']
+    data = request.get_json()
+    user_id= data.get('username')
     face_count = 1
 
     if global_frame is None:
@@ -101,15 +102,14 @@ def check_in_route():
     skip_landmarks = True
 
     if global_frame is not None:
+        user_id = face_matching.recognize_faces(global_frame)
         data = request.get_json()
         model_type = data.get('model_type')
-        print(model_type)
-        user_id = face_matching.recognize_faces(global_frame)
         print(user_id)
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
             save_attendance(user_id, "check-in", emotion)
-            message = "Success:" + emotion
+            message = emotion
         else:
             message = "User not recognized."
     else:
@@ -130,7 +130,8 @@ def check_out_route():
 
     if global_frame is not None:
         user_id = face_matching.recognize_faces(global_frame)
-        model_type = request.form['model_type']
+        data = request.get_json()
+        model_type = data.get('model_type')
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
             save_attendance(user_id, "check-out", emotion)
