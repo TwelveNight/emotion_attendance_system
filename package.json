@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@types/react-lottie": "^1.2.10",
-    "antd": "^5.18.0",
-    "lottie-react": "^2.4.0",
-    "lottie-web": "^5.12.2"
-  }
-}

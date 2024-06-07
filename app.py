@@ -10,6 +10,7 @@ from attendance import view_attendance, save_attendance
 from emotion_recognition import recognize_emotion
 from user_register import register_face
 from utils import save_frame
+from flask_cors import CORS
 
 os.environ["TF_GPU_ALLOCATOR"] = "cuda_malloc_async"
 os.environ["TF_CPP_VMODULE"] = "gpu_process_state=10,gpu_cudamallocasync_allocator=10"
@@ -17,6 +18,8 @@ os.environ["TF_CPP_VMODULE"] = "gpu_process_state=10,gpu_cudamallocasync_allocat
 a = tf.zeros([], tf.float32)
 
 app = Flask(__name__)
+CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})  # 仅允许 http://example.com 访问
 app.secret_key = 'secret_key'
 
 camera = cv2.VideoCapture(0)
@@ -51,6 +54,11 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/get_video_feed_url')
+def get_video_feed_url():
+    video_feed_url = url_for('video_feed')
+    return jsonify({'url': video_feed_url})
 
 
 @app.route('/register', methods=['POST'])
@@ -93,8 +101,10 @@ def check_in_route():
     skip_landmarks = True
 
     if global_frame is not None:
+        data = request.get_json()
+        model_type = data.get('model_type')
+        print(model_type)
         user_id = face_matching.recognize_faces(global_frame)
-        model_type = request.form['model_type']
         print(user_id)
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
