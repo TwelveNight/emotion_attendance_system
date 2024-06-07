@@ -2,6 +2,65 @@ import { FC, useCallback } from "react";
 import css from "./app.module.css";
 import { Button, Input, Select } from "antd";
 import RightStatus from "./components/RightStatus/RightStatus";
+import StatusTable from "./components/StatusTable/StatusTable";
+
+const mockUserStatusInfoList:UserStatusInfoType[] = [
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+  {
+    name: "叶墨沫",
+    times: "2021-09-01",
+    isSmile: true,
+    emotions: true,
+  },
+]
+
 const App: FC = () => {
   const renderLeft = useCallback(() => {
     return (
@@ -50,7 +109,7 @@ const App: FC = () => {
     return (
       <div className={css.rightBox}>
         <div>
-          <img src="{{ url_for('video_feed') }}" width="640" height="480"></img>
+          <img src="{{ url_for('video_feed') }}" width="500rem" height="375rem"></img>
         </div>
       </div>
     );
@@ -59,12 +118,18 @@ const App: FC = () => {
 
   return (
     <div className={css.allBox}>
-      <p className={css.leftTitle}>人脸识别系统</p>
+      <h1 className={css.leftTitle}>人脸识别系统</h1>
       <div className={css.container}>
         {renderLeft()}
         {renderImage()}
         <RightStatus name="叶墨沫" isSmile={true} isUnique={true}></RightStatus>
       </div>
+      <div style={{
+        width:'100%'
+      }}>
+        <StatusTable userStatusInfoList={mockUserStatusInfoList}></StatusTable>
+      </div>
+
     </div>
   );
 };
