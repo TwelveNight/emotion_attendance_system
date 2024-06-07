@@ -17,6 +17,10 @@ class FaceApi {
         console.log(value)
         return await this.http.post(this.urls.checkIn,{model_type:value})
     }
+    
+    async register(username:string){
+        return await this.http.post(this.urls.register,{username})
+    }
 }
 
 const faceApi = new FaceApi()

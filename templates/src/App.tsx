@@ -87,10 +87,15 @@ const mockUserStatusInfoList:UserStatusInfoType[] = [
 
 const App: FC = () => {
   const [checkInValue,setCheckInValue] = useState('pkl')
+  const [registerUsername,setRegisterUsername] = useState('')
   const checkIn = useCallback(async ()=>{
     const response = await faceApi.checkIn(checkInValue)
     console.log(response)
   },[checkInValue])
+  
+  const register = useCallback(()=>{
+    const promise = faceApi.register(registerUsername)
+  },[])
   
   const renderLeft = useCallback(() => {
     return (
@@ -130,8 +135,11 @@ const App: FC = () => {
               <Button type="primary">开始录出</Button>
           </div>
           <div className={css.registerBox}>
-            <Input placeholder="输入你的用户名"></Input>
-            <Button type="primary">注册</Button>
+            <Input placeholder="输入你的用户名" onChange={(e)=>{
+              console.log(e.target.value)
+              setRegisterUsername(e.target.value)
+            }}></Input>
+            <Button type="primary" onClick={register}>注册</Button>
           </div>
         </div>
       </div>
