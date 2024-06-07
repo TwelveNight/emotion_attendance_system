@@ -222,7 +222,6 @@ fer2013.csv
 *.tif
 
 # Scalable Vector Graphics
-*.svg
 *.svgz
 
 # Portable Document Format
