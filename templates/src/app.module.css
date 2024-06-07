@@ -12,6 +12,15 @@ body{
   align-items: center;
   box-sizing: border-box;
   background: linear-gradient(0deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 27%, rgba(34,131,150,1) 100%);
+  -ms-overflow-style: none;  /* 对IE和Edge隐藏滚动条 */
+  scrollbar-width: none;  /* 对Firefox隐藏滚动条 */
+}
+body::-webkit-scrollbar {
+    display: none; /* 对WebKit内核浏览器隐藏滚动条 */
+}
+
+body {
+
 }
 
 .all-box{
