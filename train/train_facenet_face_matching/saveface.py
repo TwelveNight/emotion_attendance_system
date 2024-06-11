@@ -1,6 +1,7 @@
 import cv2
 import os
 
+
 def capture_faces(frame, name, save_dir="dataset", num_images=10):
     """
     Capture faces from the provided frame and save them to a specified directory.
@@ -48,7 +49,8 @@ def capture_faces(frame, name, save_dir="dataset", num_images=10):
                 # Save the current frame
                 image_name = f"{name}_{image_counter}.jpg"
                 image_path = os.path.join(save_path, image_name)
-                cv2.imencode('.jpg', frame)[1].tofile(image_path)  # Use tofile method to save the image, ensuring correct handling of Chinese characters
+                cv2.imencode('.jpg', frame)[1].tofile(
+                    image_path)  # Use tofile method to save the image, ensuring correct handling of Chinese characters
                 print(f"Save image: {image_name}")
                 image_counter += 1
                 saved_images += 1
@@ -62,6 +64,7 @@ def capture_faces(frame, name, save_dir="dataset", num_images=10):
 
     print("Images saved successfully!")
     return saved_images  # Return the number of saved images
+
 
 # Example usage:
 name = input("Please enter name: ")
