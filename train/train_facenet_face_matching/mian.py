@@ -8,12 +8,12 @@ from keras_facenet import FaceNet
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 facenet = FaceNet()
-faces_embeddings = np.load("faces_embeddings_done_4classes.npz")
+faces_embeddings = np.load("../../models/facenet/faces_embeddings_done_4classes.npz")
 Y = faces_embeddings['arr_1']
 encoder = LabelEncoder()
 encoder.fit(Y)
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml")
-model = pickle.load(open("svm_model_test.pkl", 'rb'))
+model = pickle.load(open("../../models/facenet/svm_model.pkl", 'rb'))
 
 cap = cv2.VideoCapture(0)
 

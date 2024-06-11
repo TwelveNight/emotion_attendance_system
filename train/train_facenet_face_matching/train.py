@@ -29,15 +29,15 @@ class FACELOADING:
         return face_arr
 
     def load_faces(self, dir):
-        FACES = []
+        faces = []
         for im_name in os.listdir(dir):
             try:
                 path = dir + im_name
                 single_face = self.extract_face(path)
-                FACES.append(single_face)
+                faces.append(single_face)
             except Exception as e:
                 pass
-        return FACES
+        return faces
 
     def load_classes(self):
         for sub_dir in os.listdir(self.directory):
