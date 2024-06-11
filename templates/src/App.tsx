@@ -29,6 +29,7 @@ const App = () => {
   const [messageApi,messageHolader] = message.useMessage()
   
   const [isUnique , setIsUnique] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   useEffect(()=>{
     localStorage.setItem('checkStoryList',JSON.stringify(checkStoryList))
   },[checkStoryList])
@@ -47,6 +48,7 @@ const App = () => {
     })
     try{
       const response = await faceApi.checkIn(checkInValue)
+      setIsOpen(true)
       messageApi.destroy()
     if (response.status == 200){
       if (response.data.code == 5){
@@ -95,18 +97,38 @@ const App = () => {
       content:'加载中',
       duration: 0,
     })
-    const promise =await faceApi.register(registerUsername)
-    messageApi.destroy()
+    try{
+      const promise =await faceApi.register(registerUsername)
+      console.log(promise)
+      messageApi.destroy()
+    }catch (e){
+      messageApi.destroy()
+      message.error('注册失败')
+    }
+    
   }
 
   const logOut = async () => {
     messageApi.loading({
-      content:'退出中',
+      content: '退出中',
       duration: 0,
     })
-    const promise = await faceApi.logOut()
+    try {
+      const promise = await faceApi.logOut()
+    
     messageApi.destroy()
-    message.success('退出成功')
+    message.success('后端退出成功，3s后退出网页')
+      setTimeout(()=>{
+       window.close()
+      },3000)
+    }catch(e){
+      //退出当前网页
+      message.success('后端退出成功，3s后退出网页')
+      setTimeout(()=>{  
+        //删除当前页面
+        window.close()
+      },3000)
+    }
   }
   
   const renderLeft = useCallback(() => {
@@ -152,7 +174,15 @@ const App = () => {
           borderRadius:'20px',
           overflow:'hidden',
         }}>
-          <img src="http://127.0.0.1:8088/video_feed" width="800px" height="600px"></img>
+          <div
+          className={css.userImgBox}    
+              style={{
+            width:window.innerWidth * 0.5,
+            height:window.innerWidth * 0.5 * 0.75,
+          }}>
+            <img src="http://127.0.0.1:8088/video_feed" className={css.userImg}></img>
+          </div>
+
         </div>
       </div>
     );
@@ -160,16 +190,16 @@ const App = () => {
 
 
   return (
-    <div className={css.allBox}>
-      {messageHolader}
-      <h1 className={css.leftTitle}>人脸识别系统</h1>
+      <div className={css.allBox}>
+        {messageHolader}
+        <h1 className={css.leftTitle}>情绪打卡系统</h1>
       <div className={css.container}>
         {renderLeft()}
         {renderImage()}
-        <RightStatus name={userId}  isUnique={isUnique} emotion={emotion} frame={frame}></RightStatus>
+        <RightStatus name={userId}  isUnique={isUnique} emotion={emotion} frame={frame} isOpen={isOpen}></RightStatus>
       </div>
       <div style={{
-        width:'100%'
+        width:'50%'
       }}>
         <StatusTable userStatusInfoList={checkStoryList}></StatusTable>
       </div>
