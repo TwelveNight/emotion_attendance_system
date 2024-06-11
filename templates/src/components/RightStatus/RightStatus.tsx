@@ -7,12 +7,14 @@ import useShowAnimation from '../../hook/useShowAnimation'
 interface RightStatusType{
   name:string
   isSmile:boolean,
-  isUnique:boolean
+  isUnique:boolean,
+  emotion:string
 }
 const RightStatus:FC<RightStatusType> = ({
   isSmile = false,
   isUnique = false,
-  name = "默认用户"
+  name = "默认用户",
+  emotion = "默认"
 })=>{
   const lottieRef = useRef<HTMLDivElement>(null)
   useShowAnimation(lottieRef,true,300,faceAnimation)
@@ -31,7 +33,7 @@ const RightStatus:FC<RightStatusType> = ({
       </div>
       <div className={css.emotionStatus}>
         <p>当前人物情绪:</p>
-        {isSmile?'微笑':'非微笑'}
+        {emotion}
       </div>
       <div className={css.actionStatus}>
         {(isUnique && isSmile ) &&
