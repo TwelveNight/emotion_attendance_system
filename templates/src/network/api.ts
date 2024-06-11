@@ -22,6 +22,10 @@ class FaceApi {
     async register(username:string){
         return await this.http.post(this.urls.register,{username})
     }
+
+    async logOut(){
+        return await this.http.post(this.urls.terminate)
+    }
 }
 
 const faceApi = new FaceApi()

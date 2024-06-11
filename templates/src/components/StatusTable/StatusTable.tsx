@@ -1,8 +1,9 @@
 import { FC, useCallback } from "react";
 import css from "./index.module.css";
+import { Story } from "../../store/checkStory";
 
 interface StatusTableType {
-  userStatusInfoList: UserStatusInfoType[];
+  userStatusInfoList: Story[];
 }
 
 const StatusTable: FC<StatusTableType> = ({ userStatusInfoList = [] }) => {
@@ -10,16 +11,15 @@ const StatusTable: FC<StatusTableType> = ({ userStatusInfoList = [] }) => {
     return userStatusInfoList.map((item, index) => {
       return (
         <div key={index} className={css.tabItem}>
-          <div className={css.name}>{item.name}</div>
-          <div className={css.times}>{item.times}</div>
-          <div className={css.isSmile}>{item.isSmile ? "微笑" : "非微笑"}</div>
+          <div className={css.name}>{item.userId}</div>
+          <div className={css.times}>{item.time}</div>
           <div className={css.emotions}>
-            {item.emotions ? "高兴" : "不高兴"}
+            {item.emotion}
           </div>
         </div>
       );
     });
-  }, []);
+  }, [userStatusInfoList]);
   return (
     <div className={css.tabBox}>
       <div className={css.tabInnerBox}>
