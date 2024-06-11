@@ -116,9 +116,7 @@ def check_in_route():
         print(user_id)
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
-            save_attendance(user_id, "check-in", emotion)
-            # return json format
-            
+            save_attendance(user_id, "check-in", emotion)  
             message = {
                 'emotion': emotion,
                 'user_id': user_id,
