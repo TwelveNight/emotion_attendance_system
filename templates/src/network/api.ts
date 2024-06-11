@@ -10,7 +10,8 @@ class FaceApi {
         checkOut: 'check_out',
         recognize: '/recognize',
         unregister: '/unregister',
-        terminate: '/terminate'
+        terminate: '/terminate',
+
     }
     
     async checkIn(value:string){
