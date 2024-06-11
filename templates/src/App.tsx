@@ -1,98 +1,45 @@
-import {FC, useCallback, useState} from "react";
+import {FC, useCallback, useEffect, useState} from "react";
 import css from './app.module.css';
 import { Button, Input, Select, message } from "antd";
 import RightStatus from "./components/RightStatus/RightStatus";
 import StatusTable from "./components/StatusTable/StatusTable";
 import faceApi from "./network/api";
-const mockUserStatusInfoList:UserStatusInfoType[] = [
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-     {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-  {
-    name: "叶墨沫",
-    times: "2021-09-01",
-    isSmile: true,
-    emotions: true,
-  },
-]
-
-const App: FC = () => {
+import { produce } from "immer";
+import useCheckStoryStore from "./store/checkStory";
+interface Story{
+  userId:string,
+  time:string,
+  emotion:string,
+}
+const App = () => {
   const [checkInValue,setCheckInValue] = useState('pkl')
   const [registerUsername,setRegisterUsername] = useState('')
   const [emotion,setEmotion] = useState('未知')
   const [userId, setUserId] = useState('')
   const [frame,setFrame] = useState('')
+  const [checkStoryList,setCheckStoryList] = useState<Story[]>(()=>{
+    const data = localStorage.getItem('checkStoryList')
+    if (data){
+      return JSON.parse(data)
+    }else{
+      localStorage.setItem('checkStoryList',JSON.stringify([]))
+      return []
+    }
+  })
   const [messageApi,messageHolader] = message.useMessage()
+  
   const [isUnique , setIsUnique] = useState(false)
+  useEffect(()=>{
+    localStorage.setItem('checkStoryList',JSON.stringify(checkStoryList))
+  },[checkStoryList])
+  const pushStory = (story:Omit<Story,'time'>)=>{
+    setCheckStoryList(produce((draft)=>{
+      draft.push({
+        ...story,
+        time:new Date().toLocaleString().split(' ')[0]+' '+new Date().toLocaleString().split(' ')[1]
+      })
+    }))
+  }
   const checkIn = useCallback(async ()=>{
     messageApi.loading({
       content:'加载中',
@@ -129,6 +76,10 @@ const App: FC = () => {
       setEmotion(response.data.emotion)
       setUserId(response.data.user_id)
       setFrame('data:image/jpeg;base64,'+ response.data.frame)
+      pushStory({
+        userId:response.data.user_id,
+        emotion:response.data.emotion
+      })
       
     }else{
       messageApi.error('录入失败')
@@ -146,6 +97,16 @@ const App: FC = () => {
     })
     const promise =await faceApi.register(registerUsername)
     messageApi.destroy()
+  }
+
+  const logOut = async () => {
+    messageApi.loading({
+      content:'退出中',
+      duration: 0,
+    })
+    const promise = await faceApi.logOut()
+    messageApi.destroy()
+    message.success('退出成功')
   }
   
   const renderLeft = useCallback(() => {
@@ -176,7 +137,9 @@ const App: FC = () => {
               setRegisterUsername(e.target.value)
             }}></Input>
             <Button type="primary" onClick={register}>注册</Button>
+
           </div>
+          <Button type='primary' onClick={logOut}>退出</Button>
         </div>
       </div>
     );
@@ -208,7 +171,7 @@ const App: FC = () => {
       <div style={{
         width:'100%'
       }}>
-        <StatusTable userStatusInfoList={mockUserStatusInfoList}></StatusTable>
+        <StatusTable userStatusInfoList={checkStoryList}></StatusTable>
       </div>
     </div>
   );
