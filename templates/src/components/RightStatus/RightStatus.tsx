@@ -9,11 +9,12 @@ interface RightStatusType{
   isUnique:boolean,
   emotion:string,
     frame:string,
+    isOpen:boolean
 }
 const RightStatus:FC<RightStatusType> = ({
   isUnique = false,
   name = "默认用户",
-  emotion = "默认", frame = ''
+  emotion = "默认", frame = '',isOpen = false,
 })=>{
   const lottieRef = useRef<HTMLDivElement>(null)
   useShowAnimation(lottieRef,true,300,faceAnimation)
@@ -33,7 +34,7 @@ const RightStatus:FC<RightStatusType> = ({
       }}></div>}
       <div className={css.faceStatus}>
         <p>当前人脸识别状态:</p>
-        {isUnique?'成功':'失败'}
+        {isOpen ? (isUnique?'成功':'失败') : '未识别'}
       </div>
       <div className={css.emotionStatus}>
         <p>当前人物情绪:</p>
