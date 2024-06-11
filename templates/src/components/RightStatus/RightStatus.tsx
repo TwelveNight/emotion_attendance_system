@@ -6,15 +6,14 @@ import faceAnimation from './animation/face.json'
 import useShowAnimation from '../../hook/useShowAnimation'
 interface RightStatusType{
   name:string
-  isSmile:boolean,
   isUnique:boolean,
-  emotion:string
+  emotion:string,
+    frame:string,
 }
 const RightStatus:FC<RightStatusType> = ({
-  isSmile = false,
   isUnique = false,
   name = "默认用户",
-  emotion = "默认"
+  emotion = "默认", frame = ''
 })=>{
   const lottieRef = useRef<HTMLDivElement>(null)
   useShowAnimation(lottieRef,true,300,faceAnimation)
@@ -23,10 +22,15 @@ const RightStatus:FC<RightStatusType> = ({
   return (
     <div className={css.rightBox}>
       <div className={css.usernameBox}>当前用户:{name}</div>
-      <div className='lottie-box' id='lottie-animation' ref={lottieRef} style={{
+      {frame != '' 
+      ? 
+      <img src={frame} style={{
+          width: 200,
+      }}></img>
+      : <div className='lottie-box' id='lottie-animation' ref={lottieRef} style={{
         width: 200,
         height: 200,
-      }}></div>
+      }}></div>}
       <div className={css.faceStatus}>
         <p>当前人脸识别状态:</p>
         {isUnique?'成功':'失败'}
@@ -36,13 +40,14 @@ const RightStatus:FC<RightStatusType> = ({
         {emotion}
       </div>
       <div className={css.actionStatus}>
-        {(isUnique && isSmile ) &&
+        {(isUnique && 
         <div className={css.okBox}>
           <img src={success} style={{
             width: 20,
           }}></img>
-          打卡成功
+             打卡成功 
         </div>
+        )
         }
       </div>
     </div>

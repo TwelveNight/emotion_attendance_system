@@ -1,16 +1,18 @@
-from flask import Flask, render_template, Response, request, redirect, url_for, flash, jsonify
 import os
 import signal
+
 import cv2
 import tensorflow as tf
+import base64
 import torch
+from flask import Flask, render_template, Response, request, redirect, url_for, flash, jsonify
+from flask_cors import CORS
 
 import face_matching
 from attendance import view_attendance, save_attendance
 from emotion_recognition import recognize_emotion
 from user_register import register_face
 from utils import save_frame
-from flask_cors import CORS
 
 os.environ["TF_GPU_ALLOCATOR"] = "cuda_malloc_async"
 os.environ["TF_CPP_VMODULE"] = "gpu_process_state=10,gpu_cudamallocasync_allocator=10"
@@ -28,6 +30,10 @@ global_frame = None
 
 skip_landmarks = False
 
+def encode_image_to_base64(image):
+    _, buffer = cv2.imencode('.jpg', image)
+    image_base64 = base64.b64encode(buffer).decode('utf-8')
+    return image_base64
 
 def gen_frames():
     global detected_face
@@ -55,6 +61,7 @@ def index():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
 @app.route('/get_video_feed_url')
 def get_video_feed_url():
     video_feed_url = url_for('video_feed')
@@ -65,7 +72,8 @@ def get_video_feed_url():
 def register():
     global global_frame, skip_landmarks
     data = request.get_json()
-    user_id= data.get('username')
+    user_id = data.get('username')
+    print('userid', user_id)
     face_count = 1
 
     if global_frame is None:
@@ -98,7 +106,7 @@ def check_in_route():
     global detected_face
     global global_frame
     global skip_landmarks
-
+    frame_base64 = encode_image_to_base64(global_frame)
     skip_landmarks = True
 
     if global_frame is not None:
@@ -109,41 +117,29 @@ def check_in_route():
         if user_id is not None:
             emotion = recognize_emotion(global_frame, model_type)
             save_attendance(user_id, "check-in", emotion)
-            message = emotion
+            # return json format
+            
+            message = {
+                'emotion': emotion,
+                'user_id': user_id,
+                'frame': frame_base64,
+                'code': 0,
+            }
+
         else:
-            message = "User not recognized."
+            message = {
+                'code': 5,
+                'frame': frame_base64,
+            }
     else:
-        message = "No face detected."
+        message = {
+            'code': 4
+        }
 
     skip_landmarks = False
 
-    return message
+    return jsonify(message)
 
-
-@app.route('/check_out', methods=['POST'])
-def check_out_route():
-    global detected_face
-    global global_frame
-    global skip_landmarks
-
-    skip_landmarks = True
-
-    if global_frame is not None:
-        user_id = face_matching.recognize_faces(global_frame)
-        data = request.get_json()
-        model_type = data.get('model_type')
-        if user_id is not None:
-            emotion = recognize_emotion(global_frame, model_type)
-            save_attendance(user_id, "check-out", emotion)
-            message = "Success:" + emotion
-        else:
-            message = "User not recognized."
-    else:
-        message = "No face detected."
-
-    skip_landmarks = False
-
-    return message
 
 
 @app.route('/view_attendance')

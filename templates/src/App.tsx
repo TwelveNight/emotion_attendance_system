@@ -1,5 +1,5 @@
 import {FC, useCallback, useState} from "react";
-import css from "./app.module.css";
+import css from './app.module.css';
 import { Button, Input, Select, message } from "antd";
 import RightStatus from "./components/RightStatus/RightStatus";
 import StatusTable from "./components/StatusTable/StatusTable";
@@ -89,16 +89,47 @@ const App: FC = () => {
   const [checkInValue,setCheckInValue] = useState('pkl')
   const [registerUsername,setRegisterUsername] = useState('')
   const [emotion,setEmotion] = useState('未知')
+  const [userId, setUserId] = useState('')
+  const [frame,setFrame] = useState('')
   const [messageApi,messageHolader] = message.useMessage()
+  const [isUnique , setIsUnique] = useState(false)
   const checkIn = useCallback(async ()=>{
-    messageApi.loading('加载中')
+    messageApi.loading({
+      content:'加载中',
+      duration: 0,
+    })
     try{
       const response = await faceApi.checkIn(checkInValue)
       messageApi.destroy()
     if (response.status == 200){
+      if (response.data.code == 5){
+        messageApi.error({
+            content:'录入失败,用户未注册',
+            duration:3
+        })
+        setIsUnique(false)
+        setFrame('data:image/jpeg;base64,'+ response.data.frame)
+        return
+      }
+      if (response.data.code == 4){
+        messageApi.error({
+            content:'录入失败，未识别到人脸',
+            duration:3
+        })
+        setIsUnique(false)
+        return
+      }
       //返回为text类型
-      messageApi.success('录入成功,表情:',response.data)
-      setEmotion(response.data)
+      messageApi.success({
+        
+        content:`录入成功,表情:${response.data.emotion}`, 
+        duration:3
+      })
+      setIsUnique(true)
+      setEmotion(response.data.emotion)
+      setUserId(response.data.user_id)
+      setFrame('data:image/jpeg;base64,'+ response.data.frame)
+      
     }else{
       messageApi.error('录入失败')
     }
@@ -108,16 +139,21 @@ const App: FC = () => {
     }
   },[checkInValue])
   
-  const register = useCallback(()=>{
-    const promise = faceApi.register(registerUsername)
-  },[])
+  const register = async ()=>{
+    messageApi.loading({
+      content:'加载中',
+      duration: 0,
+    })
+    const promise =await faceApi.register(registerUsername)
+    messageApi.destroy()
+  }
   
   const renderLeft = useCallback(() => {
     return (
       <div className={css.leftBox}>
         <div className={css.formBox}>
           <div className={css.checkBox}>
-              <p>录入模式:</p>
+              <p>打卡模式:</p>
               <Select
                 style={{
                   width: 100,
@@ -132,22 +168,7 @@ const App: FC = () => {
                   { label: "h5", value: "h5" },
                 ]}
               ></Select>
-              <Button type="primary" onClick={checkIn}>开始录入</Button>
-          </div>
-          <div className={css.checkBox}>
-              <p>录出模式:</p>
-              <Select
-                style={{
-                  width: 100,
-                }}
-                defaultValue={"pkl"}
-                options={[
-                  { label: "pkl", value: "pkl" },
-                  { label: "deepface", value: "deepface" },
-                  { label: "h5", value: "h5" },
-                ]}
-              ></Select>
-              <Button type="primary">开始录出</Button>
+              <Button type="primary" onClick={checkIn}>打卡</Button>
           </div>
           <div className={css.registerBox}>
             <Input placeholder="输入你的用户名" onChange={(e)=>{
@@ -159,7 +180,7 @@ const App: FC = () => {
         </div>
       </div>
     );
-  }, []);
+  }, [registerUsername,checkInValue])
   
   const renderImage = useCallback(() => {
     return (
@@ -182,7 +203,7 @@ const App: FC = () => {
       <div className={css.container}>
         {renderLeft()}
         {renderImage()}
-        <RightStatus name="叶墨沫" isSmile={true} isUnique={true} emotion={emotion}></RightStatus>
+        <RightStatus name={userId}  isUnique={isUnique} emotion={emotion} frame={frame}></RightStatus>
       </div>
       <div style={{
         width:'100%'
