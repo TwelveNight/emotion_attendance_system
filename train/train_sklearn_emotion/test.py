@@ -6,7 +6,7 @@ from utils import get_face_landmarks
 
 emotions = ['happy', 'sad', 'surprised']
 
-with open('../../models/model_4.pkl', 'rb') as f:
+with open('../../models/model.pkl', 'rb') as f:
     model = pickle.load(f)
 
 # img = cv2.imread('check.jpg')
