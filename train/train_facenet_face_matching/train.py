@@ -11,7 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 from keras_facenet import FaceNet
 
 
-class FACELOADING:
+class Faceloading:
     def __init__(self, directory):
         self.directory = directory
         self.target_size = (160, 160)
@@ -50,18 +50,8 @@ class FACELOADING:
 
         return np.asarray(self.X), np.asarray(self.Y)
 
-    def plot_images(self):
-        plt.figure(figsize=(18, 16))
-        for num, image in enumerate(self.X):
-            ncols = 3
-            nrows = len(self.Y) // ncols + 1
-            plt.subplot(nrows, ncols, num + 1)
-            plt.imshow(image)
-            plt.axis('off')
-
-
 detector = MTCNN()
-faceloading = FACELOADING("dataset")
+faceloading = Faceloading("dataset")
 X, Y = faceloading.load_classes()
 print(Y)
 
