@@ -250,3 +250,8 @@ fer2013.csv
 # Misc
 *.txt
 node_modules
+/data/attendance.csv
+/train/train_yolo_face_detection/data.yaml
+/train/train_yolo_face_detection/data/train/labels.cache
+/train/train_yolo_face_detection/data/val/labels.cache
+/templates/.vite/deps_temp_54084d35/package.json
