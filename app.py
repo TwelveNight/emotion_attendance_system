@@ -126,11 +126,13 @@ def check_in_route():
 
         else:
             message = {
+                'emotion': '未知',
                 'code': 5,
                 'frame': frame_base64,
             }
     else:
         message = {
+            'emotion': '未知',
             'code': 4
         }
 

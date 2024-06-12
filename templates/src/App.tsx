@@ -12,7 +12,7 @@ interface Story{
   emotion:string,
 }
 const App = () => {
-  const [checkInValue,setCheckInValue] = useState('pkl')
+  const [checkInValue,setCheckInValue] = useState('h5')
   const [registerUsername,setRegisterUsername] = useState('')
   const [emotion,setEmotion] = useState('未知')
   const [userId, setUserId] = useState('')
@@ -53,12 +53,12 @@ const App = () => {
     if (response.status == 200){
       if (response.data.code == 5){
         messageApi.error({
-            content:'录入失败,用户未注册',
+            content:'录入失败,未检测到注册用户',
             duration:3
         })
         setIsUnique(false)
         setFrame('data:image/jpeg;base64,'+ response.data.frame)
-        return
+        return 
       }
       if (response.data.code == 4){
         messageApi.error({
@@ -146,9 +146,9 @@ const App = () => {
                     setCheckInValue(value)
                 }}
                 options={[
+                  { label: "h5", value: "h5" },
                   { label: "pkl", value: "pkl" },
                   { label: "deepface", value: "deepface" },
-                  { label: "h5", value: "h5" },
                 ]}
               ></Select>
               <Button type="primary" onClick={checkIn}>打卡</Button>
@@ -192,7 +192,7 @@ const App = () => {
   return (
       <div className={css.allBox}>
         {messageHolader}
-        <h1 className={css.leftTitle}>情绪打卡系统</h1>
+        <h1 className={css.leftTitle}>情绪考勤系统</h1>
       <div className={css.container}>
         {renderLeft()}
         {renderImage()}
