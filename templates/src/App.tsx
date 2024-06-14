@@ -58,6 +58,8 @@ const App = () => {
         })
         setIsUnique(false)
         setFrame('data:image/jpeg;base64,'+ response.data.frame)
+        setUserId("未知")
+        setEmotion("未知")
         return 
       }
       if (response.data.code == 4){
@@ -66,6 +68,7 @@ const App = () => {
             duration:3
         })
         setIsUnique(false)
+       
         return
       }
       //返回为text类型
