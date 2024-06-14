@@ -25,7 +25,7 @@ pip install -r requirements.txt
 - requirements.txt中也许没有包含所有的库，如果有缺失请自行安装
 - [如果有问题，请提issue](https://github.com/TwelveNight/emotion_attendance_system)
 
-### 5. 所有软件包如下
+### 5. 所有软件包如下,实在不能跑请对比以下软件包版本
 ```bash
 # packages in environment at D:\IDE\python\miniconda\envs\emotion_attendance_system:
 #
