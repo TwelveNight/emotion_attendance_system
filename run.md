@@ -2,7 +2,7 @@
 
 ## 请先建一个python虚拟环境，建议用conda,以下以conda为例
 
-### 1. install tensorflow(或者用linux,具体请看官方文档)
+### 1. install tensorflow(这里用weindows本机跑，其它选择请看[官方文档](https://www.tensorflow.org/install/pip#:~:text=conda%20install%20%2Dc%20conda%2Dforge%20cudatoolkit%3D11.2%20cudnn%3D8.1.0%0A%23%20Anything%20above%202.10%20is%20not%20supported%20on%20the%20GPU%20on%20Windows%20Native%0Apython%20%2Dm%20pip%20install%20%22tensorflow%3C2.11%22%0A%23%20Verify%20the%20installation%3A%0Apython%20%2Dc%20%22import%20tensorflow%20as%20tf%3B%20print(tf.config.list_physical_devices(%27GPU%27)))
 ```bash
 conda install -c conda-forge cudatoolkit=11.8 cudnn=8.1.0
 # Anything above 2.10 is not supported on the GPU on Windows Native
