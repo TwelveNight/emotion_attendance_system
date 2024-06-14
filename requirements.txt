@@ -1,5 +1,4 @@
 opencv-python
-tensorflow<2.11
 deepface
 numpy
 pandas
@@ -9,6 +8,10 @@ matplotlib
 pillow
 tqdm
 flask
+flask_cors
 scikit-learn
 mediapipe
 ultralytics
+keras-facenet
+mtcnn
+jupyter
