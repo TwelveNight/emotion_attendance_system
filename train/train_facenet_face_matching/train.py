@@ -11,12 +11,13 @@ from sklearn.preprocessing import LabelEncoder
 from keras_facenet import FaceNet
 
 
+# load face images and labels
 class Faceloading:
     def __init__(self, directory):
         self.directory = directory
         self.target_size = (160, 160)
-        self.X = []
-        self.Y = []
+        self.X = []  # images
+        self.Y = []  # labels
         self.detector = MTCNN()
 
     def extract_face(self, filename):
@@ -50,6 +51,7 @@ class Faceloading:
 
         return np.asarray(self.X), np.asarray(self.Y)
 
+
 detector = MTCNN()
 faceloading = Faceloading("dataset")
 X, Y = faceloading.load_classes()
@@ -58,10 +60,10 @@ print(Y)
 embedder = FaceNet()
 
 
+# get face images embeddings data
 def get_embedding(face_img):
     face_img = face_img.astype('float32')  # 3D(160x160x3)
-    face_img = np.expand_dims(face_img, axis=0)
-    # 4D (Nonex160x160x3)
+    face_img = np.expand_dims(face_img, axis=0)  # 4D (Nonex160x160x3)
     yhat = embedder.embeddings(face_img)
     return yhat[0]  # 512D image (1x1x512)
 
@@ -73,14 +75,18 @@ for img in X:
 
 EMBEDDED_X = np.asarray(EMBEDDED_X)
 
-np.savez_compressed('faces_embeddings_done_4classes_test.npz', EMBEDDED_X, Y)
+np.savez_compressed('faces_embeddings_done_4classes.npz', EMBEDDED_X, Y)
 
+# label encoding
 encoder = LabelEncoder()
 encoder.fit(Y)
+# transform labels to integers
 Y = encoder.transform(Y)
 
+# split data
 X_train, X_test, Y_train, Y_test = train_test_split(EMBEDDED_X, Y, shuffle=True, random_state=17)
 
+# train model
 model = SVC(kernel='linear', probability=True)
 model.fit(X_train, Y_train)
 
