@@ -23,3 +23,4 @@ pip install -r requirements.txt
 ### 4. misc
 - 由于开发过程中没有一次性搭建好所有环境，使用了一些不同的库，所以可能会有一些冲突，如果有冲突请按照提示更换版本
 - requirements.txt中也许没有包含所有的库，如果有缺失请自行安装
+- [如果有问题，请提issue](https://github.com/TwelveNight/emotion_attendance_system/tree/fe_ui)
