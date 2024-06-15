@@ -12,9 +12,10 @@ from deepface import DeepFace
 # 定义情绪标签
 emotions = ['happy', 'sad', 'surprised']
 
+
 # 加载模型
 def load_models():
-    with open('models/model.pkl', 'rb') as f:
+    with open('models/svm_model.pkl', 'rb') as f:
         model_pkl = pickle.load(f)
 
     model_h5 = Sequential()

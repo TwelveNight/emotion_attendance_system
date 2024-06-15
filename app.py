@@ -30,10 +30,12 @@ global_frame = None
 
 skip_landmarks = False
 
+
 def encode_image_to_base64(image):
     _, buffer = cv2.imencode('.jpg', image)
     image_base64 = base64.b64encode(buffer).decode('utf-8')
     return image_base64
+
 
 def gen_frames():
     global detected_face
@@ -108,15 +110,15 @@ def check_in_route():
     global skip_landmarks
     frame_base64 = encode_image_to_base64(global_frame)
     skip_landmarks = True
-
+    captured_face = global_frame
     if global_frame is not None:
-        user_id = face_matching.recognize_faces(global_frame)
+        user_id = face_matching.recognize_faces(captured_face)
         data = request.get_json()
         model_type = data.get('model_type')
         print(user_id)
         if user_id is not None:
-            emotion = recognize_emotion(global_frame, model_type)
-            save_attendance(user_id, "check-in", emotion)  
+            emotion = recognize_emotion(captured_face, model_type)
+            save_attendance(user_id, "check-in", emotion)
             message = {
                 'emotion': emotion,
                 'user_id': user_id,
@@ -139,7 +141,6 @@ def check_in_route():
     skip_landmarks = False
 
     return jsonify(message)
-
 
 
 @app.route('/view_attendance')
