@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from PIL import Image
-from tqdm import tqdm
+from tqdm import tqdm  # progress bar
 import os
 
 
@@ -105,4 +105,4 @@ for i in tqdm(range(len(df))):
             img.save(val_dir + '/neutral/im' + str(neutral_test) + '.png')
             neutral_test += 1
 
-print("Done!")
+print("success")

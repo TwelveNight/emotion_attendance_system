@@ -6,7 +6,7 @@ from utils import get_face_landmarks
 
 emotions = ['happy', 'sad', 'surprised']
 
-with open('../../models/model.pkl', 'rb') as f:
+with open('../../models/svm_model.pkl', 'rb') as f:
 # with open('../../models/svm_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
@@ -26,6 +26,7 @@ while ret:
     face_landmarks = get_face_landmarks(global_frame, draw=True, static_image_mode=False)
 
     if face_landmarks:
+        print(face_landmarks)
         output = model.predict([face_landmarks])
         print(emotions[int(output[0])])
         cv2.putText(global_frame,

@@ -2,8 +2,20 @@ import cv2
 import mediapipe as mp
 
 import os
+import logging
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+
+class IgnoreWarnings(logging.Filter):
+    def filter(self, record):
+        if "inference_feedback_manager.cc" in record.getMessage():
+            return False
+        return True
+
+
+logger = logging.getLogger('tensorflow')
+logger.addFilter(IgnoreWarnings())
 
 
 def get_face_landmarks(image, draw=False, static_image_mode=True):
@@ -22,18 +34,31 @@ def get_face_landmarks(image, draw=False, static_image_mode=True):
         if draw:
             mp_drawing = mp.solutions.drawing_utils
             drawing_spec = mp_drawing.DrawingSpec(thickness=2, circle_radius=1)
-            mp_drawing.draw_landmarks(
-                image=image,
-                landmark_list=results.multi_face_landmarks[0],
-                connections=mp.solutions.face_mesh.FACEMESH_CONTOURS,
-                landmark_drawing_spec=drawing_spec,
-                connection_drawing_spec=drawing_spec)
+            # mp_drawing.draw_landmarks(
+            #     image=image,
+            #     landmark_list=results.multi_face_landmarks[0],
+            #     connections=mp.solutions.face_mesh.FACEMESH_CONTOURS,
+            #     landmark_drawing_spec=drawing_spec,
+            #     connection_drawing_spec=drawing_spec)
+
+            selected_landmarks_indices = [
+                10, 152, 234, 454, 61, 291, 78, 308,  # 面部轮廓和特征点
+                33, 133, 362, 263,  # 左右眼角
+                13, 14, 17, 18,  # 鼻子
+                0, 17, 78, 292  # 嘴巴
+            ]
+            face_landmarks = results.multi_face_landmarks[0]
+            for idx, landmark in enumerate(face_landmarks.landmark):
+                if idx in selected_landmarks_indices:
+                    x = int(landmark.x * image_cols)
+                    y = int(landmark.y * image_rows)
+                    cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
 
         ls_single_face = results.multi_face_landmarks[0].landmark
         xs_ = []
         ys_ = []
         zs_ = []
-        for idx in ls_single_face:
+        for idx in ls_single_face:  # 468 points * 3
             xs_.append(idx.x)
             ys_.append(idx.y)
             zs_.append(idx.z)
