@@ -61,16 +61,16 @@ class FaceRecognizer:
         return np.asarray([self.get_embedding(face) for face in X])
 
     def train(self, dataset_dir):
-        X, Y = self.load_classes(dataset_dir)
-        X_embeddings = self.prepare_embeddings(X)
+        x, y = self.load_classes(dataset_dir)
+        x_embeddings = self.prepare_embeddings(x)
 
-        np.savez_compressed(self.embeddings_path, X_embeddings, Y)
+        np.savez_compressed(self.embeddings_path, x_embeddings, y)
 
         self.encoder = LabelEncoder()
-        self.encoder.fit(Y)
-        Y_encoded = self.encoder.transform(Y)
+        self.encoder.fit(y)
+        Y_encoded = self.encoder.transform(y)
 
-        X_train, X_test, Y_train, Y_test = train_test_split(X_embeddings, Y_encoded, shuffle=True, random_state=17)
+        X_train, X_test, Y_train, Y_test = train_test_split(x_embeddings, Y_encoded, shuffle=True, random_state=17)
 
         self.model = SVC(kernel='linear', probability=True)
         self.model.fit(X_train, Y_train)
@@ -81,7 +81,7 @@ class FaceRecognizer:
         print("Model trained and saved successfully.")
         del self.model
         del self.encoder
-        del X_embeddings
+        del x_embeddings
 
     def predict(self, img):
         if self.model is None or self.encoder is None:
