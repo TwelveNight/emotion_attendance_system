@@ -7,9 +7,6 @@ pipeline.to("cuda")
 import random
 import os
 
-import matplotlib.pyplot as plt
-
-
 os.makedirs('/content/faces/happy', exist_ok=True)
 os.makedirs('/content/faces/sad', exist_ok=True)
 os.makedirs('/content/faces/surprised', exist_ok=True)

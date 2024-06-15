@@ -62,8 +62,8 @@ embedder = FaceNet()
 
 # get face images embeddings data
 def get_embedding(face_img):
-    face_img = face_img.astype('float32')  # 3D(160x160x3)
-    face_img = np.expand_dims(face_img, axis=0)  # 4D (Nonex160x160x3)
+    face_img = face_img.astype('float32')  # 3D (160x160x3)
+    face_img = np.expand_dims(face_img, axis=0)  # 4D (160x160x3x1)
     yhat = embedder.embeddings(face_img)
     return yhat[0]  # 512D image (1x1x512)
 
@@ -74,6 +74,7 @@ for img in X:
     EMBEDDED_X.append(get_embedding(img))
 
 EMBEDDED_X = np.asarray(EMBEDDED_X)
+print(EMBEDDED_X)
 
 np.savez_compressed('faces_embeddings_done_4classes.npz', EMBEDDED_X, Y)
 
@@ -90,19 +91,19 @@ X_train, X_test, Y_train, Y_test = train_test_split(EMBEDDED_X, Y, shuffle=True,
 model = SVC(kernel='linear', probability=True)
 model.fit(X_train, Y_train)
 
-t_im = cv2.imread("face.jpg")
-t_im = cv2.cvtColor(t_im, cv2.COLOR_BGR2RGB)
-x, y, w, h = detector.detect_faces(t_im)[0]['box']
-
-t_im = t_im[y:y + h, x:x + w]
-t_im = cv2.resize(t_im, (160, 160))
-
-test_im = get_embedding(t_im)
-test_im = [test_im]
-
-ypreds = model.predict(test_im)
-encoder.inverse_transform(ypreds)
-print(ypreds)
+# t_im = cv2.imread("face.jpg")
+# t_im = cv2.cvtColor(t_im, cv2.COLOR_BGR2RGB)
+# x, y, w, h = detector.detect_faces(t_im)[0]['box']
+#
+# t_im = t_im[y:y + h, x:x + w]
+# t_im = cv2.resize(t_im, (160, 160))
+#
+# test_im = get_embedding(t_im)
+# test_im = [test_im]
+#
+# ypreds = model.predict(test_im)
+# encoder.inverse_transform(ypreds)
+# print(ypreds)
 
 #save the model
 with open('svm_model_test.pkl', 'wb') as f:

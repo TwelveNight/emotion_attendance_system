@@ -1,6 +1,10 @@
 import cv2
 import mediapipe as mp
 
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 
 def get_face_landmarks(image, draw=False, static_image_mode=True):
     # Read the input image
