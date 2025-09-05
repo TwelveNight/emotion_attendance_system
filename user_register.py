@@ -7,7 +7,7 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from keras_facenet import FaceNet
-
+import shutil
 
 class FaceRecognizer:
     def __init__(self, model_path='svm_model.pkl', embeddings_path='faces_embeddings_done.npz'):
@@ -18,6 +18,7 @@ class FaceRecognizer:
         self.target_size = (160, 160)
         self.model = None
         self.encoder = None
+        self.load_model()
 
     def extract_face(self, img):
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -39,18 +40,6 @@ class FaceRecognizer:
                 print(f"Failed to load image {im_name}: {e}")
         return faces
 
-    def load_classes(self, dataset_dir):
-        X, Y = [], []
-        for sub_dir in os.listdir(dataset_dir):
-            path = os.path.join(dataset_dir, sub_dir)
-            if os.path.isdir(path):
-                faces = self.load_faces(path)
-                labels = [sub_dir for _ in range(len(faces))]
-                X.extend(faces)
-                Y.extend(labels)
-                print(f"Loaded {len(faces)} faces for class {sub_dir}")
-        return np.asarray(X), np.asarray(Y)
-
     def get_embedding(self, face_img):
         face_img = face_img.astype('float32')
         face_img = np.expand_dims(face_img, axis=0)
@@ -60,45 +49,77 @@ class FaceRecognizer:
     def prepare_embeddings(self, X):
         return np.asarray([self.get_embedding(face) for face in X])
 
-    def train(self, dataset_dir):
-        x, y = self.load_classes(dataset_dir)
-        x_embeddings = self.prepare_embeddings(x)
+    def load_model(self):
+        if os.path.exists(self.model_path):
+            with open(self.model_path, 'rb') as f:
+                self.model = pickle.load(f)
+        if os.path.exists(self.embeddings_path):
+            data = np.load(self.embeddings_path)
+            X_emb = data['arr_0']
+            Y = data['arr_1']
+            self.encoder = LabelEncoder()
+            self.encoder.fit(Y)
 
-        np.savez_compressed(self.embeddings_path, x_embeddings, y)
+    def train_incremental(self, new_dataset_dir):
+        # 加载新数据
+        new_X, new_Y = [], []
+        for sub_dir in os.listdir(new_dataset_dir):
+            path = os.path.join(new_dataset_dir, sub_dir)
+            if os.path.isdir(path):
+                faces = self.load_faces(path)
+                labels = [sub_dir for _ in range(len(faces))]
+                new_X.extend(faces)
+                new_Y.extend(labels)
+                print(f"Loaded {len(faces)} faces for class {sub_dir}")
 
-        self.encoder = LabelEncoder()
-        self.encoder.fit(y)
-        Y_encoded = self.encoder.transform(y)
+        new_X_emb = self.prepare_embeddings(new_X)
 
-        X_train, X_test, Y_train, Y_test = train_test_split(x_embeddings, Y_encoded, shuffle=True, random_state=17)
+        if self.model is None:
+            # 如果模型不存在，从头开始训练
+            self.model = SVC(kernel='linear', probability=True)
+            self.encoder = LabelEncoder()
+            self.encoder.fit(new_Y)
+            Y_encoded = self.encoder.transform(new_Y)
+        else:
+            # 增量训练
+            new_Y_encoded = self.encoder.transform(new_Y)
+            self.model.fit(np.vstack([self.model.support_vectors_, new_X_emb]),
+                           np.hstack([self.model.support_  , new_Y_encoded]))
 
-        self.model = SVC(kernel='linear', probability=True)
-        self.model.fit(X_train, Y_train)
+        # 合并新旧嵌入向量和标签
+        if os.path.exists(self.embeddings_path):
+            old_data = np.load(self.embeddings_path)
+            old_X_emb = old_data['arr_0']
+            old_Y = old_data['arr_1']
+            combined_X_emb = np.vstack([old_X_emb, new_X_emb])
+            combined_Y = np.hstack([old_Y, new_Y])
+        else:
+            combined_X_emb = new_X_emb
+            combined_Y = new_Y
+
+        np.savez_compressed(self.embeddings_path, combined_X_emb, combined_Y)
 
         with open(self.model_path, 'wb') as f:
             pickle.dump(self.model, f)
 
-        print("Model trained and saved successfully.")
-        del self.model
-        del self.encoder
-        del x_embeddings
+        print("Model updated and saved successfully.")
+
+        # 删除新数据集文件夹
+        if os.path.exists(new_dataset_dir):
+            shutil.rmtree(new_dataset_dir)
 
     def predict(self, img):
         if self.model is None or self.encoder is None:
-            with open(self.model_path, 'rb') as f:
-                self.model = pickle.load(f)
-            self.encoder = LabelEncoder()
-            self.encoder.fit(np.load(self.embeddings_path)['arr_1'])
+            self.load_model()
 
         face = self.extract_face(img)
         embedding = self.get_embedding(face)
         ypred = self.model.predict([embedding])
         return self.encoder.inverse_transform(ypred)[0]
 
-
 # Example usage:
 def register_face():
     face_recognizer = FaceRecognizer(model_path='models/facenet/svm_model.pkl',
                                      embeddings_path='models/facenet/faces_embeddings_done_4classes.npz')
-    # Train with new dataset
-    face_recognizer.train("dataset")
+    # 增量训练新数据集
+    face_recognizer.train_incremental("new_dataset")
